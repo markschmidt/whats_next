@@ -1,0 +1,2 @@
+defmodule WhatsNext do
+end
