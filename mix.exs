@@ -28,7 +28,8 @@ defmodule WhatsNext.Mixfile do
   defp deps do
     [
       { :httpotion, "~> 0.2.4", github: "myfreeweb/httpotion"},
-      { :json, "~> 0.3.0" }
+      { :json, "~> 0.3.0" },
+      { :mock, "~> 0.0.4", github: "jjh42/mock" }
     ]
   end
 
