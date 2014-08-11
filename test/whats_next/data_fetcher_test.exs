@@ -1,16 +1,19 @@
 defmodule WhatsNext.DataFetcherTest do
   use ExUnit.Case, async: false
+  use ExVCR.Mock
 
-  import Mock
   import WhatsNext.DataFetcher
-  import MockingHelper
 
-  test_with_mock "should fetch all data", HTTPotion, http_mock_options do
-    series = "Suits"
-    {:ok, body} = fetch(series)
+  setup_all do
+    ExVCR.Config.cassette_library_dir("test/fixtures/vcr_cassettes")
+    :ok
+  end
 
-    assert called HTTPotion.get("http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=allintitle:%20site:epguides.com%20#{series}")
-    assert called HTTPotion.get("http://epguides.com/#{series}/")
+  test "should fetch all data" do
+    use_cassette "requests_for_suits" do
+      series = "Suits"
+      {:ok, body} = fetch(series)
+    end
   end
 
 end

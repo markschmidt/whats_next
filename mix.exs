@@ -27,9 +27,11 @@ defmodule WhatsNext.Mixfile do
   # Type `mix help deps` for more examples and options
   defp deps do
     [
-      { :httpotion, "~> 0.2.4", github: "myfreeweb/httpotion"},
+      { :httpotion, "~> 0.2.4", github: "myfreeweb/httpotion", override: true },
       { :json, "~> 0.3.0" },
-      { :mock, "~> 0.0.4", github: "jjh42/mock" }
+      { :exvcr, "~> 0.3.1", github: "parroty/exvcr" },
+      { :mock, "~> 0.0.4", github: "jjh42/mock" },
+      { :meck, "0.8.2", github: "eproxus/meck", override: true }
     ]
   end
 
