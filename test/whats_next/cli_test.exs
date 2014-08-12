@@ -21,6 +21,13 @@ defmodule WhatsNext.CLITest do
     end
   end
 
+  test_with_mock "should print airdate for Utopia regression", IO, [:passthrough], [puts: fn(_str) -> nil end] do
+    use_cassette "requests_for_utopia" do
+      process({"Utopia", "2x05"})
+      assert called IO.puts "Utopia: 2014-08-12"
+    end
+  end
+
   test_with_mock "should print airdate for input from stdin", IO, [:passthrough], [puts: fn(_str) -> nil end] do
     use_cassette "requests_for_suits" do
       process(["Suits: 3x02", "Suits: 3x03", "Suits: 3x04"])
