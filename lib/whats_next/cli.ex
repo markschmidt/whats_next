@@ -12,6 +12,7 @@ defmodule WhatsNext.CLI do
     case parse do
       { [ help: true ], _ }       -> :help
       { _, [series, episode], _ } -> { series, episode }
+      { _, [], _ }                -> Enum.to_list(IO.stream(:stdio, :line))
       _                           -> :help
     end
   end
@@ -21,6 +22,13 @@ defmodule WhatsNext.CLI do
     usage: whats_next <series> <episode_number>
     """
     System.halt(0)
+  end
+
+  def process(list) when is_list(list) do
+    for input <- list do
+      [series, episode] = String.split(input, ":") |> Enum.map(&String.strip(&1))
+      process {series, episode}
+    end
   end
 
   def process({series, episode}) do
