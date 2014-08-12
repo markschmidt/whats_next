@@ -1,4 +1,4 @@
-ExUnit.start()
+ExUnit.start(trace: true)
 
 defmodule MockingHelper do
   def http_mock_options do
