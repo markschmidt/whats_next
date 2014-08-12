@@ -26,7 +26,8 @@ defmodule WhatsNext.CLI do
   def process({series, episode}) do
     series
     |> WhatsNext.DataFetcher.fetch
-    |> WhatsNext.Decoder.decode(episode)
+    |> WhatsNext.Decoder.decode
+    |> WhatsNext.Episode.next_air_date(episode)
     |> print_result(series)
   end
 

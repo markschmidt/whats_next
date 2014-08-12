@@ -16,7 +16,7 @@ defmodule WhatsNext.CLITest do
 
   test_with_mock "should print airdate for given input", IO, [:passthrough], [puts: fn(_str) -> nil end] do
     use_cassette "requests_for_suits" do
-      process({"Suits", "3x12"})
+      process({"Suits", "3x11"})
       assert called IO.puts "Suits: 2014-03-13"
     end
   end

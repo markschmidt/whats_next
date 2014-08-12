@@ -1,32 +1,21 @@
 defmodule WhatsNext.Decoder do
 
-  def decode(data, episode) do
-    data
-    |> find_next_episode(episode)
-    |> format_date
+  def decode({:ok, raw_epguide_page}) do
+    raw_epguide_page
+    |> find_episodes
+    |> Enum.map(&normalize_entry(&1))
   end
 
-  def find_next_episode({:ok, body}, episode) do
-    episode = convert_episode(episode)
-    case Regex.run(~r/^.*#{episode}.*(\d\d\/.+\/\d\d).*<a/rim, body) do
-      [_, tail] -> {:ok, tail}
-      nil       -> {:error}
-    end
-  end
-  def find_next_episode({:error, body}, _) do
-    IO.puts :stderr, "Error: #{body}"
-    {:error}
+  defp find_episodes(raw_page) do
+    Regex.scan(~r/^.*(\d?\d\-\d\d).*(\d\d\/.+\/\d\d).*<a/rim, raw_page)
+    |> Enum.map(fn(x) -> tl(x) end)
   end
 
-  def convert_episode(episode) do
-    episode |> String.replace("x", "-") |> remove_leading_zero
+  defp normalize_entry([episode, date]) do
+    [String.replace(episode, "-", "x"), format_date(date)]
   end
 
-  def remove_leading_zero(<<head :: integer, tail :: binary>>) when head == 48, do: tail
-  def remove_leading_zero(str), do: str
-
-  def format_date({:error}), do: nil
-  def format_date({:ok, string}) do
+  def format_date(string) do
     # 06/Jan/11
     [day, month, year] = String.split(string, "/")
     full_year(String.to_integer(year)) <> "-" <> month_to_i(month) <> "-" <> day
