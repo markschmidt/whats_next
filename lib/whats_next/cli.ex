@@ -4,6 +4,7 @@ defmodule WhatsNext.CLI do
     argv
     |> parse_args
     |> process
+    |> print_results
   end
 
   def parse_args(argv) do
@@ -25,20 +26,24 @@ defmodule WhatsNext.CLI do
   end
 
   def process(list) when is_list(list) do
-    for input <- list do
+    list |> Enum.map(fn(input) ->
       [series, episode] = String.split(input, ":") |> Enum.map(&String.strip(&1))
       process {series, episode}
-    end
+    end)
   end
 
   def process({series, episode}) do
-    series
-    |> WhatsNext.DataFetcher.fetch
-    |> WhatsNext.Decoder.decode
-    |> WhatsNext.Episode.next_air_date(episode)
-    |> print_result(series)
+    date = series
+           |> WhatsNext.DataFetcher.fetch
+           |> WhatsNext.Decoder.decode
+           |> WhatsNext.Episode.next_air_date(episode)
+
+    {series, date}
   end
 
-  defp print_result(date, series), do: IO.puts "#{series}: #{date}"
+  def print_results({series, date}), do: IO.puts "#{series}: #{date}"
+  def print_results(list) when is_list(list) do
+    Enum.each(list, fn(x) -> print_results(x) end)
+  end
 
 end
