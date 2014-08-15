@@ -4,11 +4,15 @@ defmodule WhatsNext.DataFetcher do
 
   def fetch(series) do
     series
+    |> correct_series_name
     |> fetch_series_id
     |> decode_json
     |> extract_series_url
     |> fetch_data
   end
+
+  def correct_series_name("Utopia"), do: "Utopia -2014"
+  def correct_series_name(name), do: name
 
   defp fetch_series_id(series) do
     query = "allintitle: site:epguides.com " <> series
