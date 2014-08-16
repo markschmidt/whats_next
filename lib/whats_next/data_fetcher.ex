@@ -2,6 +2,8 @@ defmodule WhatsNext.DataFetcher do
 
   alias HTTPotion.Response
 
+  import WhatsNext.FileCache, only: [cache: 2]
+
   def fetch(series) do
     series
     |> correct_series_name
@@ -13,18 +15,16 @@ defmodule WhatsNext.DataFetcher do
   def correct_series_name(name), do: name
 
   defp fetch_epguides_url(series) do
-    case File.read(cache_file(series)) do
-      {:ok, body} -> body |> String.strip
-      _           -> fetch_epguides_url(series, :refresh_cache)
-    end
+    cache(cache_file(:id, series), fn() ->
+      fetch_epguides_url(series, :without_cache)
+    end)
   end
 
-  defp fetch_epguides_url(series, :refresh_cache) do
+  defp fetch_epguides_url(series, :without_cache) do
     series
     |> fetch_series_id
     |> decode_json
     |> extract_series_url
-    |> write_to_cache(series)
   end
 
   defp fetch_series_id(series) do
@@ -44,35 +44,11 @@ defmodule WhatsNext.DataFetcher do
     (response["responseData"]["results"] |> hd)["unescapedUrl"]
   end
 
-  defp write_to_cache(url, series) do
-    unless File.exists?(cache_folder), do: File.mkdir_p(cache_folder)
-    case File.write(cache_file(series), url <> "\n") do
-      :ok -> nil
-      {:error, reason} -> IO.puts "Could not write cache-file: #{reason}"
-    end
-    url
-  end
-
-  defp write_to_data_cache({:ok, data}, series) do
-    unless File.exists?(cache_folder_data), do: File.mkdir_p(cache_folder_data)
-    case File.write(cache_file_data(series), data <> "\n") do
-      :ok -> nil
-      {:error, reason} -> IO.puts "Could not write cache-file: #{reason}"
-    end
-    {:ok, data}
-  end
-  defp write_to_data_cache(response, series), do: response
-
-  defp cache_folder, do: "#{System.user_home}/.cache/whats_next/epguides_ids"
-  defp cache_file(series), do: Path.join([cache_folder, series])
-
-  defp cache_folder_data, do: "#{System.user_home}/.cache/whats_next/epguides_data"
-  defp cache_file_data(series), do: Path.join([cache_folder_data, series])
-
-  def fetch_epguides_data(url, series) do
-    case File.read(cache_file_data(series)) do
-      {:ok, body} -> {:ok, body}
-      _           -> fetch_data(url) |> write_to_data_cache(series)
+  defp fetch_epguides_data(url, series) do
+    case cache(cache_file(:data, series), fn() -> fetch_data(url) end) do
+      {:ok, data}    -> {:ok, data}
+      {:error, data} -> {:error, data}
+      data           -> {:ok, data}
     end
   end
 
@@ -86,4 +62,6 @@ defmodule WhatsNext.DataFetcher do
     end
   end
 
+  defp cache_file(:id, series), do: "#{System.user_home}/.cache/whats_next/epguides_ids/#{series}"
+  defp cache_file(:data, series), do: "#{System.user_home}/.cache/whats_next/epguides_data/#{series}"
 end
