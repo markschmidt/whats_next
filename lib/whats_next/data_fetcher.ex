@@ -32,7 +32,7 @@ defmodule WhatsNext.DataFetcher do
   end
 
   defp fetch_data(url) do
-    case HTTPotion.get(url) do
+    case HTTPotion.get(url, [], [timeout: 10000]) do
       %Response{body: body, status_code: status, headers: _headers }
       when status in 200..299 ->
         { :ok, body }
