@@ -1,5 +1,5 @@
 defmodule WhatsNext.FileCacheTest do
-  use ExUnit.Case, async: false
+  use ExUnit.Case
 
   import WhatsNext.FileCache
 
