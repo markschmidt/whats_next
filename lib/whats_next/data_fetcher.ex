@@ -1,8 +1,7 @@
 defmodule WhatsNext.DataFetcher do
 
-  alias HTTPotion.Response
-
   import WhatsNext.FileCache, only: [cache: 2]
+  alias HTTPotion.Response
 
   def fetch(series) do
     series
@@ -45,11 +44,8 @@ defmodule WhatsNext.DataFetcher do
   end
 
   defp fetch_epguides_data(url, series) do
-    case cache(cache_file(:data, series), fn() -> fetch_data(url) end) do
-      {:ok, data}    -> {:ok, data}
-      {:error, data} -> {:error, data}
-      data           -> {:ok, data}
-    end
+    cache(cache_file(:data, series), fn() -> fetch_data(url) end)
+    |> ensure_tuple
   end
 
   defp fetch_data(url) do
@@ -64,4 +60,7 @@ defmodule WhatsNext.DataFetcher do
 
   defp cache_file(:id, series), do: "#{System.user_home}/.cache/whats_next/epguides_ids/#{series}"
   defp cache_file(:data, series), do: "#{System.user_home}/.cache/whats_next/epguides_data/#{series}"
+
+  defp ensure_tuple(data) when is_tuple(data), do: data
+  defp ensure_tuple(data), do: {:ok, data}
 end
