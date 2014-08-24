@@ -6,7 +6,7 @@ defmodule WhatsNext.Episode do
     if same_episode?(current, episode), do: Enum.at(next, 1),
     else: do_next_air_date([next|tail], episode)
   end
-  defp do_next_air_date([_], _), do: nil
+  defp do_next_air_date(_, _), do: nil
 
 
   defp same_episode?([episode1, _], episode2) do

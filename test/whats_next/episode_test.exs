@@ -22,4 +22,8 @@ defmodule WhatsNext.EpisodeTest do
     assert nil == next_air_date(@example_list, "20x01")
   end
 
+  test "#next_air_date should return nil if empty list is given" do
+    assert nil == next_air_date([], "20x01")
+  end
+
 end

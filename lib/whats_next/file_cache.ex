@@ -9,6 +9,7 @@ defmodule WhatsNext.FileCache do
 
   defp write_to_cache({:ok, data}, filename), do: {:ok, write_to_cache(data,filename)}
   defp write_to_cache({:error, data}, filename), do: {:error, data}
+  defp write_to_cache(nil, _filename), do: nil
   defp write_to_cache(data, filename) do
     Path.dirname(filename) |> ensure_folder_exists
     case File.write(filename, data <> "\n") do

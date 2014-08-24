@@ -10,6 +10,10 @@ defmodule WhatsNext.DecoderTest do
     assert ["4x07", "2014-07-30"] == Enum.at(result, 50)
   end
 
+  test "#decode should return empty list if invoked with {:error}" do
+    assert [] == decode({:error})
+  end
+
   defp epguides_data do
     {:ok, epguides_response}
   end

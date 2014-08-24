@@ -39,10 +39,15 @@ defmodule WhatsNext.DataFetcher do
     System.halt(2)
   end
 
-  defp extract_series_url({:ok, response}) do
-    (response["responseData"]["results"] |> hd)["unescapedUrl"]
+  defp extract_series_url({:ok, %{"responseData"=>%{"results"=>results}}}) when length(results) > 0 do
+    (results |> hd)["unescapedUrl"]
   end
+  defp extract_series_url({:ok, _}), do: nil
 
+  defp fetch_epguides_data(nil, series) do
+    IO.puts "Could not fetch url for #{series}"
+    {:error}
+  end
   defp fetch_epguides_data(url, series) do
     cache(cache_file(:data, series), fn() -> fetch_data(url) end)
     |> ensure_tuple
@@ -53,8 +58,8 @@ defmodule WhatsNext.DataFetcher do
       %Response{body: body, status_code: status, headers: _headers }
       when status in 200..299 ->
         { :ok, body }
-      %Response{body: body, status_code: _status, headers: _headers } ->
-        { :error, body }
+      %Response{body: _body, status_code: _status, headers: _headers } ->
+        { :error }
     end
   end
 

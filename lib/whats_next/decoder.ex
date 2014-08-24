@@ -5,6 +5,7 @@ defmodule WhatsNext.Decoder do
     |> find_episodes
     |> Enum.map(&normalize_entry(&1))
   end
+  def decode({:error}), do: []
 
   defp find_episodes(raw_page) do
     Regex.scan(~r/^.*(\d?\d\-\d\d).*(\d\d\/.+\/\d\d).*<a/rim, raw_page)
