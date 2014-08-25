@@ -2,6 +2,7 @@ defmodule WhatsNext.DataFetcher do
 
   import WhatsNext.FileCache, only: [cache: 2]
   alias HTTPotion.Response
+  alias WhatsNext.RelativePathHelper
 
   def fetch(series) do
     series
@@ -60,13 +61,17 @@ defmodule WhatsNext.DataFetcher do
         { :ok, body }
       %Response{body: _body, status_code: status, headers: %{"Location" => location} }
       when status in 301..302 ->
-        follow_redirect(location)
+        location |> fix_relative_location(url) |> follow_redirect
       %Response{body: _body, status_code: _status, headers: _headers } ->
         { :error }
     end
   end
 
   defp follow_redirect(location), do: fetch_data(location)
+
+  defp fix_relative_location(location, url) do
+    RelativePathHelper.traverse(location, url)
+  end
 
   defp cache_file(:id, series), do: "#{System.user_home}/.cache/whats_next/epguides_ids/#{series}"
   defp cache_file(:data, series), do: "#{System.user_home}/.cache/whats_next/epguides_data/#{series}"

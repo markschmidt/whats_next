@@ -37,6 +37,21 @@ defmodule WhatsNext.DataFetcherTest do
     {:ok, "from redirect source"} = fetch("Some Name")
   end
 
+  test_with_mock "should follow relative redirects - regression", HTTPotion, [
+    get: fn(url,_,_) ->
+      case Regex.run(~r/https?:\/\/([^\/]+)\/.*\z/, url) do
+        [_, "ajax.googleapis.com"] ->
+          %HTTPotion.Response{body: google_response, status_code: 200, headers: nil}
+        ["http://epguides.com/SomeName2" <> _, _] ->
+          %HTTPotion.Response{body: "from redirect source", status_code: 200, headers: nil}
+        [_, "epguides.com"] ->
+          %HTTPotion.Response{body: "adsf", status_code: 302, headers: %{"Location" => "../SomeName2"}}
+      end
+    end] do
+
+    {:ok, "from redirect source"} = fetch("Some Name")
+  end
+
 
   defp http_mock_options do
     [get: fn(url,_,_) ->
