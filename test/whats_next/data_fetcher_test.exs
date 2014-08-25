@@ -28,7 +28,7 @@ defmodule WhatsNext.DataFetcherTest do
         [_, "ajax.googleapis.com"] ->
           %HTTPotion.Response{body: google_response, status_code: 200, headers: nil}
         [_, "epguides.com"] ->
-          %HTTPotion.Response{body: "adsf", status_code: 302, headers: %{"Location" => "http://redirect.to/"}}
+          %HTTPotion.Response{body: "adsf", status_code: 302, headers: [Location: "http://redirect.to/"]}
         [_, "redirect.to"] ->
           %HTTPotion.Response{body: "from redirect source", status_code: 200, headers: nil}
       end
@@ -45,7 +45,7 @@ defmodule WhatsNext.DataFetcherTest do
         ["http://epguides.com/SomeName2" <> _, _] ->
           %HTTPotion.Response{body: "from redirect source", status_code: 200, headers: nil}
         [_, "epguides.com"] ->
-          %HTTPotion.Response{body: "adsf", status_code: 302, headers: %{"Location" => "../SomeName2"}}
+          %HTTPotion.Response{body: "adsf", status_code: 302, headers: [Location: "../SomeName2"]}
       end
     end] do
 

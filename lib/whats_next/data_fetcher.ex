@@ -59,9 +59,9 @@ defmodule WhatsNext.DataFetcher do
       %Response{body: body, status_code: status, headers: _headers }
       when status in 200..299 ->
         { :ok, body }
-      %Response{body: _body, status_code: status, headers: %{"Location" => location} }
+      %Response{body: _body, status_code: status, headers: headers }
       when status in 301..302 ->
-        location |> fix_relative_location(url) |> follow_redirect
+        headers[:Location] |> fix_relative_location(url) |> follow_redirect
       %Response{body: _body, status_code: _status, headers: _headers } ->
         { :error }
     end
