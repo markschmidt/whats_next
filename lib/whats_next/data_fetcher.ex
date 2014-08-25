@@ -58,14 +58,20 @@ defmodule WhatsNext.DataFetcher do
       %Response{body: body, status_code: status, headers: _headers }
       when status in 200..299 ->
         { :ok, body }
+      %Response{body: _body, status_code: status, headers: %{"Location" => location} }
+      when status in 301..302 ->
+        follow_redirect(location)
       %Response{body: _body, status_code: _status, headers: _headers } ->
         { :error }
     end
   end
+
+  defp follow_redirect(location), do: fetch_data(location)
 
   defp cache_file(:id, series), do: "#{System.user_home}/.cache/whats_next/epguides_ids/#{series}"
   defp cache_file(:data, series), do: "#{System.user_home}/.cache/whats_next/epguides_data/#{series}"
 
   defp ensure_tuple(data) when is_tuple(data), do: data
   defp ensure_tuple(data), do: {:ok, data}
+
 end
