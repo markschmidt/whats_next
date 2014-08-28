@@ -26,24 +26,26 @@ defmodule WhatsNext.CLI do
   end
 
   def process(list) when is_list(list) do
-    list |> Enum.map(fn(input) ->
-      [series, episode] = String.split(input, ":") |> Enum.map(&String.strip(&1))
-      process {series, episode}
-    end)
-  end
+    input_list = list |> Enum.map(&parse_input_line(&1))
 
-  def process({series, episode}) do
-    date = series
-           |> WhatsNext.DataFetcher.fetch
-           |> WhatsNext.Decoder.decode
-           |> WhatsNext.Episode.next_air_date(episode)
-
-    {series, date}
+    spawn_link(WhatsNext.Spawner, :spawn_processes, [input_list, self()])
+    receive do
+      {:ok, result_list} ->
+        result_list
+    end
   end
+  def process(entry), do: process([entry]) |> hd
 
   def print_results({series, date}), do: IO.puts "#{series}: #{date}"
   def print_results(list) when is_list(list) do
     Enum.each(list, fn(x) -> print_results(x) end)
   end
+
+  defp parse_input_line(input) when is_binary(input) do
+    String.split(input, ":")
+    |> Enum.map(&String.strip(&1))
+    |> List.to_tuple
+  end
+  defp parse_input_line(input) when is_tuple(input), do: input
 
 end
